@@ -40,15 +40,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(186));
-const wait_1 = __nccwpck_require__(817);
-function run() {
+const stateHelper = __importStar(__nccwpck_require__(125));
+const action_states = core.getState('actions_sta');
+function main() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const ms = core.getInput('milliseconds');
-            core.debug(`Waiting ${ms} milliseconds ...`); // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
-            core.debug(new Date().toTimeString());
-            yield (0, wait_1.wait)(parseInt(ms, 10));
-            core.debug(new Date().toTimeString());
             core.setOutput('time', new Date().toTimeString());
         }
         catch (error) {
@@ -57,38 +53,112 @@ function run() {
         }
     });
 }
-run();
+function post() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            core.setOutput('time', new Date().toTimeString());
+        }
+        catch (error) {
+            if (error instanceof Error)
+                core.setFailed(error.message);
+        }
+    });
+}
+if (!stateHelper.IsPost) {
+    main();
+}
+// Post
+else {
+    post();
+}
 
 
 /***/ }),
 
-/***/ 817:
-/***/ (function(__unused_webpack_module, exports) {
+/***/ 125:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
 
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.wait = void 0;
-function wait(milliseconds) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return new Promise(resolve => {
-            if (isNaN(milliseconds)) {
-                throw new Error('milliseconds not a number');
-            }
-            setTimeout(() => resolve('done!'), milliseconds);
-        });
-    });
+exports.setSafeDirectory = exports.setSshKnownHostsPath = exports.setSshKeyPath = exports.setRepositoryPath = exports.SshKnownHostsPath = exports.SshKeyPath = exports.PostSetSafeDirectory = exports.RepositoryPath = exports.IsPost = void 0;
+const core = __importStar(__nccwpck_require__(186));
+/**
+ * Indicates whether the POST action is running
+ */
+exports.IsPost = !!core.getState('isPost');
+/**
+ * The repository path for the POST action. The value is empty during the MAIN action.
+ */
+exports.RepositoryPath = core.getState('repositoryPath');
+/**
+ * The set-safe-directory for the POST action. The value is set if input: 'safe-directory' is set during the MAIN action.
+ */
+exports.PostSetSafeDirectory = core.getState('setSafeDirectory') === 'true';
+/**
+ * The SSH key path for the POST action. The value is empty during the MAIN action.
+ */
+exports.SshKeyPath = core.getState('sshKeyPath');
+/**
+ * The SSH known hosts path for the POST action. The value is empty during the MAIN action.
+ */
+exports.SshKnownHostsPath = core.getState('sshKnownHostsPath');
+/**
+ * Save the repository path so the POST action can retrieve the value.
+ */
+function setRepositoryPath(repositoryPath) {
+    core.saveState('repositoryPath', repositoryPath);
 }
-exports.wait = wait;
+exports.setRepositoryPath = setRepositoryPath;
+/**
+ * Save the SSH key path so the POST action can retrieve the value.
+ */
+function setSshKeyPath(sshKeyPath) {
+    core.saveState('sshKeyPath', sshKeyPath);
+}
+exports.setSshKeyPath = setSshKeyPath;
+/**
+ * Save the SSH known hosts path so the POST action can retrieve the value.
+ */
+function setSshKnownHostsPath(sshKnownHostsPath) {
+    core.saveState('sshKnownHostsPath', sshKnownHostsPath);
+}
+exports.setSshKnownHostsPath = setSshKnownHostsPath;
+/**
+ * Save the set-safe-directory input so the POST action can retrieve the value.
+ */
+function setSafeDirectory() {
+    core.saveState('setSafeDirectory', 'true');
+}
+exports.setSafeDirectory = setSafeDirectory;
+// Publish a variable so that when the POST action runs, it can determine it should run the cleanup logic.
+// This is necessary since we don't have a separate entry point.
+if (!exports.IsPost) {
+    core.saveState('isPost', 'true');
+}
 
 
 /***/ }),
